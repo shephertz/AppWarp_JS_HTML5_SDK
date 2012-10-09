@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>AppWarp WebSockets Client Sample Application</title>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+<script src="AppWarpClientSDK.js"></script>
+<script src="MyListeners.js"></script>
+
+
+<style type="text/css">
+.body {
+	font-family:Arial, Helvetica, sans-serif;
+}
+.container{
+	border:5px solid grey;
+	width:800px;
+	margin:0 auto;
+	padding:10px;
+}
+.chatLog{
+	padding:5px;
+	border:1px solid black; float:right; padding-right:20px; width:20%; height:500px; overflow:scroll
+}
+.chatLog p {
+	margin:0;
+}
+.form_wrapper{float:left; margin-bottom:15px; clear:both;}
+.clear{clear:both}
+.main_wrapper{float:left; width:70%}
+
+</style>
+</head>
+<body>
+
+<div id="wrapper">
+
+    <div id="container">
+
+        <h1>AppWarp JavaScript (Websocket) Demo</h1>
+		<p>First add your <i>ApiKey, SecretKey</i> to the <i>WarpClient.initialize</i> method. Then you must first <i>connect, join zone</i> to start playing!</p>
+		<p>Sample App code resides in TestClient.html and MyListeners.js</p>
+
+        <div id="chatLog" class="chatLog">
+
+        </div>
+		<div class="main_wrapper">
+        <div class="form_wrapper">
+		UserName<input id="username_text" type="text" />
+        <button id="disconnect">Disconnect</button>
+		<button id="connect">Connect</button>
+		<button id="join">Join Zone</button>
+		</div>
+		<div class="clear"></div>
+		<div class="form_wrapper">
+		<button id="join_lobby">Join Lobby</button>
+		<button id="leave_lobby">Leave Lobby</button>
+		<button id="subscribe_lobby">Subscribe Lobby</button>
+		<button id="unsubscribe_lobby">Unsubscribe Lobby</button>
+		<button id="live_lobby_info">Live Lobby Info</button>
+		</div>
+		<div class="clear"></div>
+		<div class="form_wrapper">
+		Room Name<input id="roomName_text" type="text" />
+        <button id="create_room">Create Room</button>
+		<button id="get_all_rooms">Get All Rooms</button>
+		<button id="get_online_users">Get Online Users</button>
+		</div>
+		<div class="clear"></div>
+		<div class="form_wrapper">
+		Room Id<input id="roomid_text" type="text" />
+		  <button id="delete_room">Delete Room</button>
+		  <button id="subscribe_room">Subscribe Room</button>
+		  <button id="unSubscribe_room">Unsubscribe Room</button>
+		  <button id="join_room">Join Room</button>
+		  <button id="leave_room">Leave Room</button>
+		  <button id="live_room_info">Get Live Room Info</button>
+		  <input id="customRoomData" type="text" />
+         <button id="set_custom_room_data">Set Custom Room Data</button> 
+		</div>
+		<div class="clear"></div>
+		<div class="form_wrapper">
+		User <input id="username" type="text" />
+		 <button id="get_live_user_info">GetLiveUserInfo</button> 
+		 <input id="customUserData" type="text" />
+         <button id="set_custom_user_Data">SetCustomUserData</button> 
+       </div>
+	   <div class="clear"></div>
+	   <div class="form_wrapper">
+         <input id="updateChatText" type="text" />
+         <button id="send_chat">Send Chat</button> 
+         <button id="send_update">Send Update</button>		 
+    </div>
+	</div>
+	<!-- #container -->
+</div>
+<script type="text/javascript">
+     // Connection
+	 var userName = '';
+      // WARNING: be aware that your keys are visible to all your users when your app is run inside a browser.
+      // Restrict your app to designated domains to avoid misuse by other party.
+      WarpClient.initialize("", "");
+	  WarpClient.addConnectionRequestListener(new MyConnectionRequestListener());
+	  WarpClient.addLobbyRequestListener(new MyLobbyRequestListener());
+	  WarpClient.addZoneRequestListener(new MyZoneRequestListener());
+	  WarpClient.addRoomRequestListener(new MyRoomRequestListener());
+	  WarpClient.addChatRequestListener(new MyChatRequestListener());
+	  WarpClient.addUpdateRequestListener(new MyUpdateRequestListener());
+	  WarpClient.addNotificationListener(new MyNotificationListener());
+	  
+	  $('#connect').click(function(){
+	      WarpClient.connect();		  		  
+	  });	
+	  $('#disconnect').click(function(){
+		 WarpClient.disconnect();
+	  });	  
+	  $('#join').click(function(){
+		 userName = $('#username_text').val();
+		 WarpClient.joinZone(userName);
+	  });	
+     // Lobby	  
+	  $('#join_lobby').click(function(){		 
+		 WarpClient.joinLobby();
+	  });	
+     $('#leave_lobby').click(function(){		 
+		 WarpClient.leaveLobby();
+	  });	 
+     $('#subscribe_lobby').click(function(){		 
+		 WarpClient.subscribeLobby();
+	  });		
+      $('#unsubscribe_lobby').click(function(){		 
+		 WarpClient.unSubscribeLobby();
+	  });	 
+      $('#live_lobby_info').click(function(){		 
+		 WarpClient.getLiveLobbyInfo();
+	  });	 
+
+     // Zone
+	 $('#create_room').click(function(){
+         var roomName = $('#roomName_text').val();	 
+		 var owner = $('#username_text').val();
+		 WarpClient.createRoom(roomName, owner, 5);
+	  });
+	  $('#delete_room').click(function(){
+         var roomId = $('#roomid_text').val();	 
+		 WarpClient.deleteRoom(roomId);
+	  });
+	  $('#get_all_rooms').click(function(){ 
+		 WarpClient.getAllRooms();
+	  });
+	  $('#get_online_users').click(function(){ 
+		 WarpClient.getOnlineUsers();
+	  });
+	  $('#get_live_user_info').click(function(){
+         var userId = $('#username').val();	 
+		 WarpClient.getLiveUserInfo(userId);
+	  });
+	  $('#set_custom_user_Data').click(function(){
+         var userId = $('#username').val();
+         var customData = $('#customUserData').val();			 
+		 WarpClient.setCustomUserData(userId,customData);
+	  });
+	  // Room 
+	   $('#subscribe_room').click(function(){
+         var roomId = $('#roomid_text').val();	 
+		 WarpClient.subscribeRoom(roomId);
+	  });
+	  $('#unSubscribe_room').click(function(){
+         var roomId = $('#roomid_text').val();	 
+		 WarpClient.unSubscribeRoom(roomId);
+	  });
+	  $('#join_room').click(function(){
+         var roomId = $('#roomid_text').val();	 
+		 WarpClient.joinRoom(roomId);
+	  });
+	  $('#leave_room').click(function(){
+         var roomId = $('#roomid_text').val();	 
+		 WarpClient.leaveRoom(roomId);
+	  });
+	   $('#live_room_info').click(function(){
+         var roomId = $('#roomid_text').val();	 
+		 WarpClient.getLiveRoomInfo(roomId);
+	  });
+	  $('#set_custom_room_data').click(function(){
+         var roomId = $('#roomid_text').val();
+         var customRoomData = $('#customRoomData').val();			 
+		 WarpClient.setCustomRoomData(roomId,customRoomData);
+	  });
+	  
+	  // Chat
+	  $('#send_chat').click(function(){
+         var chatString = $('#updateChatText').val();			 
+		 WarpClient.sendChat(chatString);
+	  });
+	  // Update 
+	  $('#send_update').click(function(){
+         var update = new Uint8Array(6);
+		 update[0] = 112;
+		 update[5] = 23;
+		 WarpClient.sendUpdate(update);
+	  });
+</script>
+</body>
+</html>
