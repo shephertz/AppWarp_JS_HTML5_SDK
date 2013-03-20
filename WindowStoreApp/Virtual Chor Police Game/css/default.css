@@ -1,0 +1,33 @@
+﻿.body {
+     font-family: Arial, Helvetica, sans-serif;
+}
+
+.jungle_button
+{
+background-image:url('images/jungle_intro.jpg');
+height: 200px;
+width: 200px;
+}
+.jungle_world_area
+{
+background-image:url('images/jungle_world_bg.jpg');
+height: 255pt;
+width: 255pt;
+position: relative;
+}
+.boundary
+{
+border: 1px solid #9C9898;
+}
+
+@media screen and (-ms-view-state: fullscreen-landscape) {
+}
+
+@media screen and (-ms-view-state: filled) {
+}
+
+@media screen and (-ms-view-state: snapped) {
+}
+
+@media screen and (-ms-view-state: fullscreen-portrait) {
+}

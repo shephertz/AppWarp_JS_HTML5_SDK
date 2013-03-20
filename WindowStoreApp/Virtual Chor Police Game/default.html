@@ -1,0 +1,57 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Virtual_Chor_Police_Game</title>
+
+    <!-- WinJS references -->
+    <link href="//Microsoft.WinJS.1.0/css/ui-light.css" rel="stylesheet" />
+    <script src="//Microsoft.WinJS.1.0/js/base.js"></script>
+    <script src="//Microsoft.WinJS.1.0/js/ui.js"></script>
+
+    <!-- Virtual_Chor_Police_Game references -->
+    <link href="/css/default.css" rel="stylesheet" />
+    <script src="/js/default.js"></script>
+    <script src="js/jquery-1.8.2-win8-1.0.js"></script>
+    <script src="js/AppWarpClientSDK.js"></script>
+    <script src="js/MyListeners.js"></script>
+    <script src="js/Util.js"></script>
+</head>
+<body>
+
+<div id="preJoin">
+<p><h2>Virtual Chor Police Game</h2>
+<img src="images/police.gif" style="width:25pt; height:25pt; position:relative;">
+<img src="images/robber.gif" style="width:25pt; height:25pt; position:relative;">
+</p>
+Enter your name <input type="text" id="username"><br>
+<button id="enterVirtualWorldButton">Enter virtual world</button>
+</div>
+<div id="postJoin" style="display: none">
+<h2>Where do you want to play?</h2>
+<img src="images/police.gif" style="width:25pt; height:25pt; position:relative;">
+<img src="images/robber.gif" style="width:25pt; height:25pt; position:relative;">
+<div class = "jungle_button">
+<button id="jungleButtonId">Enter the jungle</button>
+</div>
+</div>
+<p id="game_state"></p>
+
+<div id = "jungle_world" style="display: none"
+<p>Welcome inside the jungle. Move around using the arrow buttons</p>
+<div>
+<button id="upClickedId"><img src="images/up.png" width="20" height="20"></button>
+<button id="downClickedId"><img src="images/down.png" width="20" height="20"></button>
+<button id="rightClickedId"><img src="images/right.png" width="20" height="20"></button>
+<button id="leftClickedID"><img src="images/left.png" width="20" height="20"></button>
+</div>
+<div class="jungle_world_area">
+<img src="images/police.gif" style="width:25pt; height:25pt; position:absolute; left:0pt; top:0pt;" id="police_jungle_pt">
+<img src="images/robber.gif" style="width:25pt; height:25pt; position:absolute; left:100pt; top:100pt;" id="robber_jungle_pt">
+</div>
+</div>
+
+    <button id="gameOverButton" style="display: none">Press To start a new game</button>
+
+</body>
+</html>
