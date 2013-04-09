@@ -8,3 +8,5 @@ Check out [AppWarp](http://appwarp.shephertz.com/) to learn more about the produ
 [Getting Started](https://github.com/shephertz/AppWarp_JS_HTML5_SDK/wiki/Getting-Started)
 
 [Reference](https://github.com/shephertz/AppWarp_JS_HTML5_SDK/wiki/Reference)
+
+[FAQ](https://github.com/shephertz/AppWarp_JAVA_SDK_JAR/wiki/FAQ)
