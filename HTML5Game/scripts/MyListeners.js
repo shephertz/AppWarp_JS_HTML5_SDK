@@ -1,22 +1,30 @@
 
 function MyConnectionRequestListener() {
 	this.onConnectDone = function(result){
-		$('#chatLog').append('<p>' + 'connection result ' +result + '</p>');
+		if(result!=resultcode_success){
+			alert('connection lost due to inactivity. Refresh page and try again');
+		}
 	};
 	
 	this.onJoinZoneDone = function(result){
-		$('#chatLog').append('<p>' + 'joinzone result ' +result + '</p>');	
+		if(result == resultcode_success){
+			WarpClient.joinLobby();
+		}
 	};
 	
 	this.onDisconnectDone = function(result){
-		$('#chatLog').append('<p>' + 'disconnect result ' +result + '</p>');	
+		
 	};	
 }
 
 function MyLobbyRequestListener(){
 	this.onJoinLobbyDone = function(event){
-		$('#chatLog').append('<p>' + 'join lobby result ' +event.result + '</p>');
-		//WarpClient.removeLobbyRequestListener(lobbyObserver);
+		if(event.result == resultcode_success){
+			var divToHide = document.getElementById("preJoin");
+			var divToShow = document.getElementById("postJoin");
+			divToHide.style.display = "none";
+			divToShow.style.display = "block";			
+		}
 	}
 	this.onLeaveLobbyDone = function(event){					
 		$('#chatLog').append('<p>' + 'leave lobby result ' +event.result + '</p>');
@@ -61,20 +69,56 @@ function MyZoneRequestListener() {
 
 function MyRoomRequestListener() {
 	this.onSubscribeRoomDone = function(event){
-		$('#chatLog').append('<p>' + 'subscribe room result ' +event.result + '</p>');
+		if(event.result == resultcode_success){
+			document.getElementById("postJoin").style.display = "none";
+			if(event.roomdata.id == jungle_room_id){				
+				// inside jungle
+				current_loc_id = jungle_room_id;
+				document.getElementById("jungle_world").style.display = "block";
+				document.getElementById("ocean_world").style.display = "none";
+			}
+			else if (event.roomdata.id = ocean_room_id) {
+				// inside ocean
+				current_loc_id = ocean_room_id;
+				document.getElementById("jungle_world").style.display = "none";
+				document.getElementById("ocean_world").style.display = "block";				
+			}		
+			WarpClient.getLiveRoomInfo(current_loc_id);
+		}
 	};
 	this.onUnsubscribeRoomDone = function(event){
 		$('#chatLog').append('<p>' + 'Unsubscribe room result ' +event.result + '</p>');
 	};
 	this.onJoinRoomDone = function(event){
-		$('#chatLog').append('<p>' + 'Join room result ' +event.result + '</p>');
+		if(event.result == resultcode_success){
+			WarpClient.subscribeRoom(event.roomdata.id);
+		}
+		else{
+			alert('There are already 2 people playing. Try again later');
+		}		
 	};
 	this.onLeaveRoomDone = function(event){
 		$('#chatLog').append('<p>' + 'Leave room result ' +event.result + '</p>');
 	};
 	this.onGetLiveRoomInfoDone = function(event){
 		if(event.result == resultcode_success){
-			$('#chatLog').append('<p>' + 'Count of users in room ' +event.roomdata.id + ' is ' + event.userNameArray.length +'</p>');
+			if(event.userNameArray.length == 2){
+				// I am robber
+				current_role = role_robber;
+				var p1 = event.userNameArray[0];
+				var p2 = event.userNameArray[1];
+				if(p1 == local_username){
+					startgame(p2);
+				} 
+				else{
+					startgame(p1);
+				}
+			}
+			else{
+				// I am police. wait for robber.
+				current_role = role_police;
+				document.getElementById('game_state').innerHTML = "You are the policeman. Waiting for robber to join.";
+			}
 		}		
 	};
 	this.onSetCustomRoomDataDone = function(event){
@@ -103,10 +147,15 @@ function MyNotificationListener() {
 		$('#chatLog').append('<p>' + 'Unsubscribe room ' +roomdata.id + '</p>');
 	};
 	this.onUserLeftRoom = function(roomdata, user){
-		$('#chatLog').append('<p>' + 'Left room ' +roomdata.id + '</p>');
+		if(user != local_username){
+			moveRemote(0,0,"");
+		}
 	};
 	this.onUserJoinedRoom = function(roomdata, user){
-		$('#chatLog').append('<p>' + 'joined room ' +roomdata.id + '</p>');
+		if(current_loc_id == roomdata.id){
+			// the game can start now!
+			startgame(user);
+		}
 	};
 	this.onUserLeftLobby = function(lobbydata, user){
 		$('#chatLog').append('<p>' + 'user left lobby ' +user + '</p>');
@@ -117,7 +166,37 @@ function MyNotificationListener() {
 	this.onChatReceived = function(chatevent){
 		$('#chatLog').append('<p>' + chatevent.sender +' says ' +chatevent.chat + '</p>');
 	};
+	
 	this.onUpdatePeersReceived = function(updateevent){
-		$('#chatLog').append('<p>' + 'Got updatepeers with bytes ' +updateevent.update.length + '</p>');
+		if(updateevent.update.length == 1){
+			game_state = state_over;
+			if(current_role == role_robber) {
+				if(updateevent.update[0] == 0){
+					//alert('you lost. you are a slow robber');
+				}
+				else{
+					//alert('you won. you are a fast robber');
+				}
+			}
+			else{
+				if(updateevent.update[0] == 0){
+					//alert('you won. you are a fast policeman');
+				}
+				else{
+					//alert('you lost. you are a slow policeman');
+				}			
+			}
+			gameOver();
+			return;
+		}
+		var xPos = updateevent.update[0];
+		var yPos = updateevent.update[1];
+		var name = "";
+		for(var i=2; i<updateevent.update.length; i++){
+			name+=String.fromCharCode(updateevent.update[i]);
+		}
+		if(name!=local_username){
+			moveRemote(xPos, yPos, name);
+		}
 	};	
 }

@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>AppWarp WebSockets Demo Application</title>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+<script src="scripts/AppWarpClientSDK.js"></script>
+<script src="scripts/MyListeners.js"></script>
+<script src="scripts/UtilLayer.js"></script>
+
+
+<style type="text/css">
+.ocean_button
+{
+background-image:url('images/ocean_intro.jpg');
+height: 200px;
+width: 200px;
+}
+.jungle_button
+{
+background-image:url('images/jungle_intro.jpg');
+height: 200px;
+width: 200px;
+}
+.jungle_world_area
+{
+background-image:url('images/jungle_world_bg.jpg');
+height: 255pt;
+width: 255pt;
+position: relative;
+}
+.ocean_world_area
+{
+background-image:url('images/ocean_world_bg.jpg');
+height: 255pt;
+width: 255pt;
+position: relative;
+}
+.boundary
+{
+border: 1px solid #9C9898;
+}
+</style>
+</head>
+<body>
+<script>
+
+// Get your application keys from AppHQ and replace below
+var api_key = "Your API Key";
+var secret_key = "Your Secret Key";
+
+// Create two rooms from AppHQ and insert the ids below for ocean room and jungle room
+var ocean_room_id="Room Id 1"; 
+var jungle_room_id="Room Id 2";
+
+
+prepareAppWarp();
+var local_username="";
+var opponent_username;
+
+var current_loc_id;
+var current_role;
+var game_state;
+var time_left;
+var timer;
+function startClicked()
+{
+	var name = document.getElementById('username').value;
+	WarpClient.joinZone(name);
+	local_username = name;
+}
+function jungleClicked()
+{	
+	WarpClient.joinRoom(jungle_room_id);
+}
+function oceanClicked()
+{
+	WarpClient.joinRoom(ocean_room_id);
+}
+
+function moveLocal(x,y){
+	var you = getLocalDiv();
+	console.log('moving local to '+x+' '+y);
+	you.style.left = x+"pt";
+	you.style.top = y+"pt";
+	
+	// send update
+	var size = 2 + local_username.length
+	var update = new Uint8Array(size);
+	update[0] = x;
+	update[1] = y;
+	for(var i=0; i<local_username.length; i++){
+		update[i+2] = local_username.charCodeAt(i);
+	}
+	WarpClient.sendUpdate(update);	
+}
+
+function moveRemote(x,y,name){
+
+	var remote = getRemoteDiv();
+	remote.style.left = x+"pt";
+	remote.style.top = y+"pt";
+	console.log('moving remote to '+x+' '+y);
+	if((current_role == role_robber) && collided()){		
+		// i lost
+		var update = new Uint8Array(1);
+		update[0] = 0;
+		WarpClient.sendUpdate(update);
+	}
+}
+
+function upClicked()
+{
+	if(game_state != state_started){
+		return;
+	}
+	var you = getLocalDiv();
+	var yPos = parseInt(you.style.top);
+	var xPos = parseInt(you.style.left);
+	if(yPos > 0){
+		moveLocal(xPos, yPos-10);
+	}
+}
+
+function downClicked()
+{
+	if(game_state != state_started){
+		return;
+	}
+	var you = getLocalDiv();
+
+	var yPos = parseInt(you.style.top);
+	var xPos = parseInt(you.style.left);
+	if(yPos < 255){
+		moveLocal(xPos, yPos+10);
+	}
+}
+function leftClicked()
+{
+	if(game_state != state_started){
+		return;
+	}
+	var you = getLocalDiv();
+	var yPos = parseInt(you.style.top);
+	var xPos = parseInt(you.style.left);
+	if(xPos > 0){
+		moveLocal(xPos-10, yPos);
+	}
+}
+function rightClicked()
+{
+	if(game_state != state_started){
+		return;
+	}
+	var you = getLocalDiv();	
+	var yPos = parseInt(you.style.top);	
+	var xPos = parseInt(you.style.left);
+	if(xPos < 255){
+		moveLocal(xPos+10, yPos);
+	}
+}
+
+function switchToOcean()
+{
+	WarpClient.leaveRoom(jungle_room_id);
+	WarpClient.unSubscribeRoom(jungle_room_id);
+	
+	WarpClient.joinRoom(ocean_room_id);
+}
+
+function switchToJungle()
+{
+	WarpClient.leaveRoom(ocean_room_id);
+	WarpClient.unSubscribeRoom(ocean_room_id);
+	
+	WarpClient.joinRoom(jungle_room_id);
+}
+
+function startgame(opponent)
+{
+	time_left = 60;
+	game_state = state_started;	
+	opponent_username = opponent;
+	document.getElementById('robber_ocean_pt').style.left = "100pt";
+	document.getElementById('robber_ocean_pt').style.top = "100pt";
+	
+	document.getElementById('robber_jungle_pt').style.top = "100pt";
+	document.getElementById('robber_jungle_pt').style.left = "100pt";
+	
+	document.getElementById('police_ocean_pt').style.left = "0pt";
+	document.getElementById('police_ocean_pt').style.top = "0pt";
+	
+	document.getElementById('police_jungle_pt').style.top = "0pt";
+	document.getElementById('police_jungle_pt').style.left = "0pt";
+	
+	var stateElement = document.getElementById('game_state');
+	stateElement.innerHTML = 'Game Started!!';
+	time_left--;
+	timer=setInterval(timerExpire,1000);
+}
+
+function gameOver(){
+	
+	WarpClient.leaveRoom(current_loc_id);
+	WarpClient.unSubscribeRoom(current_loc_id);
+	if(current_loc_id == ocean_room_id){
+		document.getElementById("ocean_world").style.display = "none";
+	}
+	else{
+		document.getElementById("jungle_world").style.display = "none";
+	}
+	document.getElementById("postJoin").style.display = "block";
+	clearInterval(timer);
+	var stateElement = document.getElementById('game_state');
+	stateElement.innerHTML = '';	
+	game_state = state_over;	
+}
+
+function timerExpire()
+{
+	var stateElement = document.getElementById('game_state');
+	if(current_role == role_robber){
+		stateElement.innerHTML = 'Policeman: '+opponent_username+' Robber: YOU '+' Time Remaining:'+time_left+' seconds';
+	}
+	else{
+		stateElement.innerHTML = 'Policeman: YOU Robber: '+opponent_username+ ' Time Remaining:'+time_left+' seconds';
+	}
+	time_left--;
+	if((time_left < 0)){
+		clearInterval(timer);
+		if(current_role == role_robber){		
+			// i won
+			var update = new Uint8Array(1);
+			update[0] = 1;
+			WarpClient.sendUpdate(update);
+		}		
+	}
+}
+document.onkeyup = checkKey;
+function checkKey(e) 
+{
+	if(game_state != state_started){
+		if((e.keyCode==13) && (e.currentTarget.activeElement.id == "username"))
+		{
+			startClicked();
+		}		
+		return;		
+	}
+	
+    e = e || window.event;
+
+    if(e.keyCode==37)
+    {
+        leftClicked();
+    }
+    else if(e.keyCode==38)
+    {
+        upClicked();
+    }
+    else if(e.keyCode==39)
+    {
+        rightClicked();
+    }
+	else if(e.keyCode==40)
+    {
+        downClicked();
+    }
+}
+</script>
+<div id="preJoin">
+<p><h2>Virtual Chor Police Game</h2>
+<img src="images/police.gif" style="width:25pt; height:25pt; position:relative;">
+<img src="images/robber.gif" style="width:25pt; height:25pt; position:relative;">
+</p>
+Enter your name <input type="text" id="username"><br>
+<button onclick="startClicked()">Enter virtual world</button>
+</div>
+<div id="postJoin" style="display: none">
+<h2>Where do you want to play?</h2>
+<img src="images/police.gif" style="width:25pt; height:25pt; position:relative;">
+<img src="images/robber.gif" style="width:25pt; height:25pt; position:relative;">
+<div class = "jungle_button">
+<button onclick="jungleClicked()">Enter the jungle</button>
+</div>
+<div class = "ocean_button">
+<button onclick="oceanClicked()">Enter the ocean</button>
+</div>
+</div>
+<p id="game_state"></p>
+<div id = "ocean_world" style="display: none">
+<p>Welcome inside the ocean. Swim around using the arrow buttons</p>
+<div>
+<button onclick="upClicked()"><img src="images/up.png" width="20" height="20"></button>
+<button onclick="downClicked()"><img src="images/down.png" width="20" height="20"</button>
+<button onclick="rightClicked()"><img src="images/right.png" width="20" height="20"</button>
+<button onclick="leftClicked()"><img src="images/left.png" width="20" height="20"</button>
+</div>
+<div class="ocean_world_area">
+<img src="images/police.gif" style="width:25pt; height:25pt; position:absolute; left:0pt; top:0pt;" id="police_ocean_pt">
+<img src="images/robber.gif" style="width:25pt; height:25pt; position:absolute; left:100pt; top:100pt;" id="robber_ocean_pt">
+</div>
+</div>
+
+<div id = "jungle_world" style="display: none"
+<p>Welcome inside the jungle. Move around using the arrow buttons</p>
+<div>
+<button onclick="upClicked()"><img src="images/up.png" style="width="20" height="20"></button>
+<button onclick="downClicked()"><img src="images/down.png" width="20" height="20"></button>
+<button onclick="rightClicked()"><img src="images/right.png" width="20" height="20"></button>
+<button onclick="leftClicked()"><img src="images/left.png" width="20" height="20"></button>
+</div>
+<div class="jungle_world_area">
+<img src="images/police.gif" style="width:25pt; height:25pt; position:absolute; left:0pt; top:0pt;" id="police_jungle_pt">
+<img src="images/robber.gif" style="width:25pt; height:25pt; position:absolute; left:100pt; top:100pt;" id="robber_jungle_pt">
+</div>
+
+</div>
+</body>
+</html>
