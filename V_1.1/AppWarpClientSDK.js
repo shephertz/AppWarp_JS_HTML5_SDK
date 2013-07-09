@@ -1265,7 +1265,7 @@ replace(/(?:^|:|,)(?:\s*\[)+/g, ''))) {
 		 if(response.requestType == request_type_update_room_property){
 			handleUpdatePropertyResponse(response);
 		 }	
-		 if(response.requestType == request_type_get_room_with_n_user || response.requestType == request_type_get_room_with_properties || request_type_get_room_in_range){
+		 if(response.requestType == request_type_get_room_with_n_user || response.requestType == request_type_get_room_with_properties || response.requestType == request_type_get_room_in_range){
 			handleGetRoomWithRequest(response);
 		 }
          if(response.requestType == request_type_lock_properties){
