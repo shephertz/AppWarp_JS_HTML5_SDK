@@ -1,0 +1,6 @@
+CHANGES 1.2
+===========
+
+* Listeners Pattern Changed
+* Support for TurnBased Rooms Added
+* KeepAlive Added

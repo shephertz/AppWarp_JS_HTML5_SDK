@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Chat</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="http://bootswatch.com/journal/bootstrap.min.css">
+        <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+        <script src="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
+        <script src="appwarp.min.js"></script>
+        <script type="text/javascript">
+            var apiKey = "YOUR API KEY";
+            var secretKey = "YOUR SECRET KEY";
+            var _warpclient;
+            var nameId = "";
+            var nameStr = "";
+            var roomsText = "";
+            var inRoom = false;
+            var roomId = "";
+            
+            function onConnectDone(res)
+            {
+                if(res == AppWarp.ResultCode.Success)
+                {
+                    $("#roomInfo").html("Connected as " + nameStr);
+                    $("#chat").html("Getting Rooms!!!!");
+                    _warpclient.getAllRooms();
+                }
+                else
+                {
+                    $("#roomInfo").html("Error in Connection");
+                }
+            }
+            
+            function onGetAllRoomsDone(rooms)
+            {
+                roomsText = "";
+                $("#roomsList").html(roomsText);
+                for(var i=0; i<rooms.getRoomIds().length; ++i)
+                {
+                    _warpclient.getLiveRoomInfo(rooms.getRoomIds()[i]);
+                }
+                
+            }
+            
+            function onGetLiveRoomInfo(room)
+            {
+                roomsText += '<li><a href="#" onClick="joinRoom(\''+room.getRoom().getRoomId()+'\')">' + room.getRoom().getName() + '</a></li>';
+                $("#roomsList").html(roomsText);
+                $("#chat").html("Select a room");
+            }
+            
+            function onJoinRoomDone(room)
+            {
+                if(room.getResult() == AppWarp.ResultCode.Success)
+                {
+                    _warpclient.subscribeRoom(room.getRoomId());
+                }
+            }
+            
+            function onSubscribeRoomDone(room)
+            {
+                if(room.getResult() == AppWarp.ResultCode.Success)
+                {
+                    inRoom = true;
+                    roomId = room.getRoomId();
+                    $("#roomInfo").html("Joined Room : " + room.getName());
+                    $("#chat").html("");
+                    $("#roomsList").html('<button id="leaveBtn" onClick="leaveRoom()" type="button" class="btn btn-primary">Leave Room</button>');
+                }
+            }
+            
+            function onLeaveRoomDone(room)
+            {
+                if(room.getResult() == AppWarp.ResultCode.Success)
+                {
+                    _warpclient.unsubscribeRoom(room.getRoomId());
+                }
+            }
+            
+            function onUnsubscribeRoomDone(room)
+            {
+                if(room.getResult() == AppWarp.ResultCode.Success)
+                {
+                    inRoom = false;
+                    _warpclient.getAllRooms();
+                    $("#chat").html("");
+                }
+            }
+            
+            function onChatReceived(chat)
+            {
+                var _chat = JSON.parse(chat.getChat());
+                $("#chat").html("<dt class='text-danger'><img src='http://graph.facebook.com/"+chat.getSender()+"/picture' />" + _chat.name + "</dt><dd class='text-primary'>" + _chat.msg + "</dd>" + $("#chat").html());
+            }
+            
+            function joinRoom(id)
+            {
+                if(inRoom == false)
+                {
+                    _warpclient.joinRoom(id);
+                }
+            }
+            
+            function leaveRoom()
+            {
+                _warpclient.leaveRoom(roomId);
+                $("#roomInfo").html("Connected as " + nameStr);
+            }
+            
+            $(document).ready(function(){
+                $("#roomsRow").hide();
+                $("#nameBtn").click(function(){
+                    
+                     FB.login(function(response) {
+                       if (response.authResponse) {
+                         FB.api('/me', function(response) {
+                           //console.log(response);
+                             nameId = response.id;
+                             nameStr = response.name;
+                             
+                             $("#nameRow").hide();
+                             $("#roomsRow").show();
+                                
+                             $("#roomInfo").html("Connecting...");
+                             AppWarp.WarpClient.initialize(apiKey, secretKey);
+                             _warpclient = AppWarp.WarpClient.getInstance();
+                             _warpclient.setResponseListener(AppWarp.Events.onConnectDone, onConnectDone);
+                             _warpclient.setResponseListener(AppWarp.Events.onGetAllRoomsDone, onGetAllRoomsDone);
+                             _warpclient.setResponseListener(AppWarp.Events.onGetLiveRoomInfoDone, onGetLiveRoomInfo);
+                             _warpclient.setResponseListener(AppWarp.Events.onJoinRoomDone, onJoinRoomDone);
+                             _warpclient.setResponseListener(AppWarp.Events.onSubscribeRoomDone, onSubscribeRoomDone);
+                             _warpclient.setResponseListener(AppWarp.Events.onLeaveRoomDone, onLeaveRoomDone);
+                             _warpclient.setResponseListener(AppWarp.Events.onUnsubscribeRoomDone, onUnsubscribeRoomDone);
+                             _warpclient.setNotifyListener(AppWarp.Events.onChatReceived, onChatReceived);
+                             _warpclient.connect(nameId);
+                         });
+                       } else {
+                         console.log('User cancelled login or did not fully authorize.');
+                       }
+                     });
+                    
+                    $("#chatBtn").click(function(){
+                        if(inRoom == true)
+                        {
+                            if($("#chatText").val() != "")
+                            {
+                                var chat = {
+                                    name : nameStr,
+                                    msg : $("#chatText").val()
+                                };
+                                _warpclient.sendChat(JSON.stringify(chat));
+                                $("#chatText").val("");
+                            }
+                        }
+                    });
+                });
+            });
+        </script>
+        <style>
+            #chat dt img{
+                width: 32px;
+                height: 32px;
+                padding-right: 2px;
+            }
+            
+            #chat dd{
+                padding-left: 34px;
+                padding-bottom: 2px;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="fb-root"></div>
+        <script>
+          window.fbAsyncInit = function() {
+            // init the FB JS SDK
+            FB.init({
+              appId      : 'YOUR FACEBOOK APP ID',                        // App ID from the app dashboard
+              //channelUrl : '//WWW.YOUR_DOMAIN.COM/channel.html', // Channel file for x-domain comms
+              status     : true,                                 // Check Facebook Login status
+              xfbml      : true                                  // Look for social plugins on the page
+            });
+        
+            // Additional initialization code such as adding Event Listeners goes here
+          };
+        
+          // Load the SDK asynchronously
+          (function(d, s, id){
+             var js, fjs = d.getElementsByTagName(s)[0];
+             if (d.getElementById(id)) {return;}
+             js = d.createElement(s); js.id = id;
+             js.src = "http://connect.facebook.net/en_US/all.js";
+             fjs.parentNode.insertBefore(js, fjs);
+           }(document, 'script', 'facebook-jssdk'));
+        </script>
+        <div class="container">
+            <div class="row" id="nameRow">
+              <div class="col-md-4 col-md-offset-4 text-center">
+                  <h1>The Chat App</h1>
+                  <h3>Powered by AppWarp</h3>
+                  <div class="well">
+                    <button id="nameBtn" type="button" class="btn btn-primary">Sign-in With Facebook</button>
+                  </div>
+              </div>
+            </div>
+            <div class="row" id="roomsRow">
+                    <div class="col-md-2 well">
+                        <h4>Rooms</h4>
+                        <ul class="nav nav-pills nav-stacked" id="roomsList">
+                        </ul>
+                    </div>
+                    <div class="col-md-10">
+                        <div class="alert alert-info" id="roomInfo">
+                            No room selected
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="panel panel-default">
+                                  <div class="panel-heading">
+                                      <div class="row">
+                                          <div class="col-md-11">
+                                            <input type="text" class="form-control" id="chatText" placeholder="type here...">
+                                          </div>
+                                          <div class="col-md-1">
+                                            <button id="chatBtn" type="button" class="btn btn-primary">Send</button>
+                                          </div>
+                                      </div>
+                                  </div>
+                                  <div class="panel-body">
+                                      <dl id="chat">
+                                          Please wait!!!
+                                      </dl>
+                                  </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+            </div>
+        </div>
+    </body>
+</html>
