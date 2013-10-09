@@ -3,16 +3,16 @@
     <head>
         <title>Chat</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="stylesheet" href="http://bootswatch.com/journal/bootstrap.min.css">
-        <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
-        <script src="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
+        <link rel="stylesheet" href="bootstrap.min.css">
+        <script src="jquery-1.10.2.min.js"></script>
+        <script src="bootstrap.min.js"></script>
         <script src="appwarp.min.js"></script>
         <script type="text/javascript">
-            var apiKey = "YOUR API KEY";
-            var secretKey = "YOUR SECRET KEY";
+            var apiKey = "4f4dfd297a567c28c8febe7858d7cd8d51827196d81cdd6b98eead4fd6bb97f9";
+            var secreteKey = "609aa42d46f3c18137d8721faa9c0266439669861beba6638b9574ea90332d05";
+			
             var _warpclient;
             var nameId = "";
-            var nameStr = "";
             var roomsText = "";
             var inRoom = false;
             var roomId = "";
@@ -21,7 +21,7 @@
             {
                 if(res == AppWarp.ResultCode.Success)
                 {
-                    $("#roomInfo").html("Connected as " + nameStr);
+                    $("#roomInfo").html("Connected");
                     $("#chat").html("Getting Rooms!!!!");
                     _warpclient.getAllRooms();
                 }
@@ -89,8 +89,7 @@
             
             function onChatReceived(chat)
             {
-                var _chat = JSON.parse(chat.getChat());
-                $("#chat").html("<dt class='text-danger'><img src='http://graph.facebook.com/"+chat.getSender()+"/picture' />" + _chat.name + "</dt><dd class='text-primary'>" + _chat.msg + "</dd>" + $("#chat").html());
+                $("#chat").html("<dt class='text-danger'>"+chat.getSender() + "</dt><dd class='text-primary'>" + chat.getChat() + "</dd>" + $("#chat").html());
             }
             
             function joinRoom(id)
@@ -104,102 +103,67 @@
             function leaveRoom()
             {
                 _warpclient.leaveRoom(roomId);
-                $("#roomInfo").html("Connected as " + nameStr);
+                $("#roomInfo").html("Connected");
             }
             
             $(document).ready(function(){
                 $("#roomsRow").hide();
                 $("#nameBtn").click(function(){
                     
-                     FB.login(function(response) {
-                       if (response.authResponse) {
-                         FB.api('/me', function(response) {
-                           //console.log(response);
-                             nameId = response.id;
-                             nameStr = response.name;
-                             
-                             $("#nameRow").hide();
-                             $("#roomsRow").show();
-                                
-                             $("#roomInfo").html("Connecting...");
-                             AppWarp.WarpClient.initialize(apiKey, secretKey);
-                             _warpclient = AppWarp.WarpClient.getInstance();
-                             _warpclient.setResponseListener(AppWarp.Events.onConnectDone, onConnectDone);
-                             _warpclient.setResponseListener(AppWarp.Events.onGetAllRoomsDone, onGetAllRoomsDone);
-                             _warpclient.setResponseListener(AppWarp.Events.onGetLiveRoomInfoDone, onGetLiveRoomInfo);
-                             _warpclient.setResponseListener(AppWarp.Events.onJoinRoomDone, onJoinRoomDone);
-                             _warpclient.setResponseListener(AppWarp.Events.onSubscribeRoomDone, onSubscribeRoomDone);
-                             _warpclient.setResponseListener(AppWarp.Events.onLeaveRoomDone, onLeaveRoomDone);
-                             _warpclient.setResponseListener(AppWarp.Events.onUnsubscribeRoomDone, onUnsubscribeRoomDone);
-                             _warpclient.setNotifyListener(AppWarp.Events.onChatReceived, onChatReceived);
-                             _warpclient.connect(nameId);
-                         });
-                       } else {
-                         console.log('User cancelled login or did not fully authorize.');
-                       }
-                     });
-                    
-                    $("#chatBtn").click(function(){
-                        if(inRoom == true)
+					if($("#nameText").val() != "")
+					{
+						nameId = $("#nameText").val();
+						
+						$("#nameRow").hide();
+						$("#roomsRow").show();
+									
+						$("#roomInfo").html("Connecting...");
+						AppWarp.WarpClient.initialize(apiKey, secreteKey);
+						_warpclient = AppWarp.WarpClient.getInstance();
+						_warpclient.setResponseListener(AppWarp.Events.onConnectDone, onConnectDone);
+						_warpclient.setResponseListener(AppWarp.Events.onGetAllRoomsDone, onGetAllRoomsDone);
+						_warpclient.setResponseListener(AppWarp.Events.onGetLiveRoomInfoDone, onGetLiveRoomInfo);
+						_warpclient.setResponseListener(AppWarp.Events.onJoinRoomDone, onJoinRoomDone);
+						_warpclient.setResponseListener(AppWarp.Events.onSubscribeRoomDone, onSubscribeRoomDone);
+						_warpclient.setResponseListener(AppWarp.Events.onLeaveRoomDone, onLeaveRoomDone);
+						_warpclient.setResponseListener(AppWarp.Events.onUnsubscribeRoomDone, onUnsubscribeRoomDone);
+						_warpclient.setNotifyListener(AppWarp.Events.onChatReceived, onChatReceived);
+						_warpclient.connect(nameId);
+					}
+                });
+				
+				$("#chatBtn").click(function(){
+                    if(inRoom == true)
+                    {
+                        if($("#chatText").val() != "")
                         {
-                            if($("#chatText").val() != "")
-                            {
-                                var chat = {
-                                    name : nameStr,
-                                    msg : $("#chatText").val()
-                                };
-                                _warpclient.sendChat(JSON.stringify(chat));
-                                $("#chatText").val("");
-                            }
+                            _warpclient.sendChat($("#chatText").val());
+                            $("#chatText").val("");
                         }
-                    });
+                    }
                 });
             });
         </script>
         <style>
-            #chat dt img{
-                width: 32px;
-                height: 32px;
-                padding-right: 2px;
-            }
-            
             #chat dd{
-                padding-left: 34px;
                 padding-bottom: 2px;
             }
         </style>
     </head>
     <body>
-        <div id="fb-root"></div>
-        <script>
-          window.fbAsyncInit = function() {
-            // init the FB JS SDK
-            FB.init({
-              appId      : 'YOUR FACEBOOK APP ID',                        // App ID from the app dashboard
-              //channelUrl : '//WWW.YOUR_DOMAIN.COM/channel.html', // Channel file for x-domain comms
-              status     : true,                                 // Check Facebook Login status
-              xfbml      : true                                  // Look for social plugins on the page
-            });
-        
-            // Additional initialization code such as adding Event Listeners goes here
-          };
-        
-          // Load the SDK asynchronously
-          (function(d, s, id){
-             var js, fjs = d.getElementsByTagName(s)[0];
-             if (d.getElementById(id)) {return;}
-             js = d.createElement(s); js.id = id;
-             js.src = "http://connect.facebook.net/en_US/all.js";
-             fjs.parentNode.insertBefore(js, fjs);
-           }(document, 'script', 'facebook-jssdk'));
-        </script>
         <div class="container">
             <div class="row" id="nameRow">
               <div class="col-md-4 col-md-offset-4 text-center">
                   <h1>The Chat App</h1>
                   <h3>Powered by AppWarp</h3>
                   <div class="well">
-                    <button id="nameBtn" type="button" class="btn btn-primary">Sign-in With Facebook</button>
+					<form role="form">
+					  <div class="form-group">
+						<label for="nameText">Your Name</label>
+						<input type="text" class="form-control" id="nameText" placeholder="Enter Your Name"><br/>
+						<button id="nameBtn" type="button" class="btn btn-primary">Continue</button>
+					  </div>
+                    </form>
                   </div>
               </div>
             </div>
