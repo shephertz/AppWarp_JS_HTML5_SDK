@@ -832,7 +832,7 @@ var AppWarp;
                     var diff = time - this.AppWarp.WarpClient.instance.timeout;
 
                     if (diff > 2000) {
-                        var data = this.AppWarp.RequestBuilder.buildWarpRequest(this.SessionID, AppWarp.RequestType.KeepAlive, "", true);
+                        var data = this.AppWarp.RequestBuilder.buildWarpRequest(this.AppWarp.WarpClient.instance.SessionID, AppWarp.RequestType.KeepAlive, "", true);
                         this.AppWarp.WarpClient.instance.sendMessage(data.buffer);
                     }
                 }
@@ -1145,6 +1145,7 @@ var AppWarp;
         };
 
         WarpClient.prototype.disconnect = function () {
+            this.SessionID = 0;
             this.isConnected = false;
             this.socket.onclose = function () {
             };
