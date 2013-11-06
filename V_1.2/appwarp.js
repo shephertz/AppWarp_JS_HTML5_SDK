@@ -1103,6 +1103,7 @@ var AppWarp;
                             };
 
                             that.socket.onclose = function () {
+                                that.SessionID = 0;
                                 that.isConnected = false;
                                 if (that.responseCallbacks[AppWarp.Events.onConnectDone])
                                     that.responseCallbacks[AppWarp.Events.onConnectDone](AppWarp.ResultCode.ConnectionError);
@@ -1133,6 +1134,7 @@ var AppWarp;
                 };
 
                 this.socket.onclose = function () {
+                    that.SessionID = 0;
                     that.isConnected = false;
                     if (that.responseCallbacks[AppWarp.Events.onConnectDone])
                         that.responseCallbacks[AppWarp.Events.onConnectDone](AppWarp.ResultCode.ConnectionError);
