@@ -1,9 +1,14 @@
 CHANGES 1.3
 ===========
 
-* Added startGame()
-* Added stopGame()
-* Added getMoveHistory()
+* Added 'startGame()'
+* Added 'stopGame()'
+* Added 'getMoveHistory()'
+* New Notification event 'onGameStarted'
+* New Notification event 'onGameStopped'
+* New Response event 'onStartGameDone'
+* New Response event 'onStopGameDone'
+* New Response event 'onGetMoveHistoryDone'
 
 CHANGES 1.2
 ===========
