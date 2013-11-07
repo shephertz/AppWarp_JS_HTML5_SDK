@@ -1,3 +1,10 @@
+CHANGES 1.3
+===========
+
+* Added startGame()
+* Added stopGame()
+* Added getMoveHistory()
+
 CHANGES 1.2
 ===========
 
