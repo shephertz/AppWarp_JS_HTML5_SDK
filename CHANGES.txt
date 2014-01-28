@@ -1,3 +1,9 @@
+CHANGES 1.4
+===========
+
+* Added 'setRecoveryAllowance()'
+* Added 'recoverConnection()'
+
 CHANGES 1.3
 ===========
 

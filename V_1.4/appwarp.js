@@ -912,6 +912,7 @@ var AppWarp;
                     }
                 } else {
                     this.isConnected = false;
+                    this.SessionID = 0;
                 }
 
                 if (this.responseCallbacks[AppWarp.Events.onConnectDone])
@@ -1151,11 +1152,11 @@ var AppWarp;
 
             this.socket.onclose = function () {
                 that.isConnected = false;
-                if (WarpClient.recoveryAllowance > 0) {
+                if (WarpClient.recoveryAllowance > 0 && that.SessionID != 0) {
                     if (that.responseCallbacks[AppWarp.Events.onConnectDone])
                         that.responseCallbacks[AppWarp.Events.onConnectDone](AppWarp.ResultCode.ConnectionErrorRecoverable);
                     that.recovering = true;
-                } else {
+                } else if (that.recovering == false) {
                     that.SessionID = 0;
                     if (that.responseCallbacks[AppWarp.Events.onConnectDone])
                         that.responseCallbacks[AppWarp.Events.onConnectDone](AppWarp.ResultCode.ConnectionError);
