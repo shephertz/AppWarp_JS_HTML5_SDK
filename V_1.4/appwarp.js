@@ -1168,6 +1168,11 @@ var AppWarp;
             };
         };
 
+        WarpClient.prototype.setGeoLocation = function (location) {
+            WarpClient.geoLocation = location;
+            WarpClient.serverAddress = "";
+        };
+
         WarpClient.prototype.connect = function (user) {
             this.userName = user;
             if (WarpClient.serverAddress == "") {
@@ -1186,7 +1191,12 @@ var AppWarp;
                             that.responseCallbacks[AppWarp.Events.onConnectDone](AppWarp.ResultCode.ApiNotFound);
                     }
                 };
-                xmlHttp.open("GET", "http://control.appwarp.shephertz.com/lookup?api=" + WarpClient.apiKey, true);
+
+                if (WarpClient.geoLocation != "")
+                    xmlHttp.open("GET", "http://control.appwarp.shephertz.com/lookup?api=" + WarpClient.apiKey + "&geo=" + WarpClient.geoLocation, true);
+else
+                    xmlHttp.open("GET", "http://control.appwarp.shephertz.com/lookup?api=" + WarpClient.apiKey, true);
+
                 xmlHttp.send();
             } else {
                 this._connect(user);
@@ -1436,8 +1446,11 @@ var AppWarp;
             }
         };
         WarpClient.instance = null;
-
+        WarpClient.apiKey = "";
+        WarpClient.secretKey = "";
+        WarpClient.serverAddress = "";
         WarpClient.recoveryAllowance = 0;
+        WarpClient.geoLocation = "";
         return WarpClient;
     })();
     AppWarp.WarpClient = WarpClient;

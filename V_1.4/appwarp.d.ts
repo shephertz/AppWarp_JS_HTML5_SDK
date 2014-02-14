@@ -306,6 +306,7 @@ declare module AppWarp {
         private static secretKey;
         private static serverAddress;
         private static recoveryAllowance;
+        private static geoLocation;
         private responseCallbacks;
         private updateCallbacks;
         private socket;
@@ -327,6 +328,7 @@ declare module AppWarp {
         public setNotifyListener(evnt: number, callback: Function): void;
         public resetNotifyListener(evnt: number): void;
         private _connect(user);
+        public setGeoLocation(location: string): void;
         public connect(user: string): void;
         public disconnect(): void;
         public joinLobby(): void;
