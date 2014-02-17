@@ -1204,6 +1204,9 @@ else
         };
 
         WarpClient.prototype.disconnect = function () {
+            var data = AppWarp.RequestBuilder.buildWarpRequest(this.SessionID, AppWarp.RequestType.Signout, "", true);
+            this.sendMessage(data.buffer);
+
             this.SessionID = 0;
             this.isConnected = false;
             this.socket.onclose = function () {
