@@ -1,3 +1,7 @@
+CHANGES 1.6
+===========
+* Added better way of checking for network connection
+
 CHANGES 1.4
 ===========
 
