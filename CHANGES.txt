@@ -1,3 +1,7 @@
+CHANGES 1.6.1
+=============
+* Bug Fixes - Checks for connection state in all APIs
+
 CHANGES 1.6
 ===========
 * Added better way of checking for network connection
