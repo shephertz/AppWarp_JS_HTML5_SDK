@@ -1219,6 +1219,7 @@ var AppWarp;
                 if (user) {
                     that.joinZone(user);
                 } else {
+                    this.connectionState = AppWarp.ConnectionState.Disconnected;
                     if (that.responseCallbacks[AppWarp.Events.onConnectDone])
                         that.responseCallbacks[AppWarp.Events.onConnectDone](AppWarp.ResultCode.BadRequest);
                 }
@@ -1236,8 +1237,13 @@ var AppWarp;
                             that.responseCallbacks[AppWarp.Events.onConnectDone](AppWarp.ResultCode.ConnectionError);
                     }
                 } else if (that.connectionState == AppWarp.ConnectionState.Recovering) {
+                    that.connectionState = AppWarp.ConnectionState.Disconnected;
                     if (that.responseCallbacks[AppWarp.Events.onConnectDone])
                         that.responseCallbacks[AppWarp.Events.onConnectDone](AppWarp.ResultCode.ConnectionErrorRecoverable);
+                } else if (that.connectionState == AppWarp.ConnectionState.Connecting) {
+                    that.connectionState = AppWarp.ConnectionState.Disconnected;
+                    if (that.responseCallbacks[AppWarp.Events.onConnectDone])
+                        that.responseCallbacks[AppWarp.Events.onConnectDone](AppWarp.ResultCode.ConnectionError);
                 }
             };
 
@@ -1268,11 +1274,17 @@ var AppWarp;
                             if (res.address) {
                                 WarpClient.serverAddress = res.address;
                                 that._connect(user);
+                            } else {
+                                this.connectionState = AppWarp.ConnectionState.Disconnected;
+                                if (that.responseCallbacks[AppWarp.Events.onConnectDone])
+                                    that.responseCallbacks[AppWarp.Events.onConnectDone](AppWarp.ResultCode.ApiNotFound);
                             }
                         } else if (xmlHttp.readyState == 4 && xmlHttp.status == 404) {
+                            this.connectionState = AppWarp.ConnectionState.Disconnected;
                             if (that.responseCallbacks[AppWarp.Events.onConnectDone])
                                 that.responseCallbacks[AppWarp.Events.onConnectDone](AppWarp.ResultCode.ApiNotFound);
                         } else if (xmlHttp.readyState == 4 && xmlHttp.status == 0) {
+                            this.connectionState = AppWarp.ConnectionState.Disconnected;
                             if (that.responseCallbacks[AppWarp.Events.onConnectDone])
                                 that.responseCallbacks[AppWarp.Events.onConnectDone](AppWarp.ResultCode.ConnectionError);
                         }
