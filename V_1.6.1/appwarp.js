@@ -1303,7 +1303,7 @@ else
         };
 
         WarpClient.prototype.disconnect = function () {
-            if (this.connectionState == AppWarp.ConnectionState.Disconnected) {
+            if (this.connectionState != AppWarp.ConnectionState.Connected) {
                 if (this.responseCallbacks[AppWarp.Events.onDisconnectDone])
                     this.responseCallbacks[AppWarp.Events.onDisconnectDone](AppWarp.ResultCode.BadRequest);
 
@@ -1796,7 +1796,7 @@ else
         };
 
         WarpClient.prototype.recoverConnection = function () {
-            if (this.SessionID == 0 || this.connectionState == AppWarp.ConnectionState.Connected || WarpClient.serverAddress == "") {
+            if (this.SessionID == 0 || this.connectionState != AppWarp.ConnectionState.Disconnected || WarpClient.serverAddress == "") {
                 if (this.responseCallbacks[AppWarp.Events.onConnectDone])
                     this.responseCallbacks[AppWarp.Events.onConnectDone](AppWarp.ResultCode.BadRequest);
             } else {
