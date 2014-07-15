@@ -1,3 +1,7 @@
+CHANGES 1.6.2
+=============
+* Reason Code is now provided in onConnectDone Callback.
+
 CHANGES 1.6.1
 =============
 * Bug Fixes - Checks for connection state in all APIs
