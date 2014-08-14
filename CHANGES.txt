@@ -1,3 +1,9 @@
+CHANGES 1.6.3
+=============
+* onUserPaused Event Added
+* onUserResumed Event Added
+* isPaused() added to LiveUser
+
 CHANGES 1.6.2
 =============
 * Reason Code is now provided in onConnectDone Callback.
