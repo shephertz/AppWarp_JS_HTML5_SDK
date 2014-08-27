@@ -1,3 +1,8 @@
+CHANGES 1.6.4
+=============
+* recoverConnectionWithSessionID Added
+* getSessionID Added
+
 CHANGES 1.6.3
 =============
 * onUserPaused Event Added
