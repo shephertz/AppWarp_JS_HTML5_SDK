@@ -1,3 +1,8 @@
+Version 1.10
+============
+
+* New Turn based APIs added
+
 CHANGES 1.6.4
 =============
 * recoverConnectionWithSessionID Added
