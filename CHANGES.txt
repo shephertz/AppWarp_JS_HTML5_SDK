@@ -1,3 +1,11 @@
+Version 1.12
+============
+
+* JoinAndSubcribeRoom added
+* LeaveAndUnsucribeRoom added
+* GetRoomInRangeWithProp added
+* getUserStatus added
+
 Version 1.11
 ============
 
