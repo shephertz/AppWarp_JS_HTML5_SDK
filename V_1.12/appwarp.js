@@ -1589,7 +1589,7 @@ var AppWarp;
             var data = AppWarp.RequestBuilder.buildWarpRequest(this.SessionID, AppWarp.RequestType.UnsubscribeLobby, payload, true);
             this.sendMessage(data.buffer);
         };
-        WarpClient.prototype.JoinAndSubcribeRoom = function (roomId) {
+        WarpClient.prototype.joinAndSubcribeRoom = function (roomId) {
             if (this.connectionState != AppWarp.ConnectionState.Connected) {
                 var _room = new AppWarp.Room(AppWarp.ResultCode.BadRequest);
                 if (this.responseCallbacks[AppWarp.Events.onJoinAndSubscribeRoomDone])
@@ -1603,7 +1603,7 @@ var AppWarp;
             this.sendMessage(data.buffer);
         };
 		
-        WarpClient.prototype.LeaveAndUnsucribeRoom = function (roomId) {
+        WarpClient.prototype.leaveAndUnsucribeRoom = function (roomId) {
             if (this.connectionState != AppWarp.ConnectionState.Connected) {
                 var _room = new AppWarp.Room(AppWarp.ResultCode.BadRequest);
                 if (this.responseCallbacks[AppWarp.Events.onLeaveAndUnsubscribeRoomDone])
@@ -1900,7 +1900,7 @@ var AppWarp;
         };
 
 
-        WarpClient.prototype.GetRoomInRangeWithProp = function (minUsers,maxUsers,properties) {
+        WarpClient.prototype.getRoomInRangeWithProp = function (minUsers,maxUsers,properties) {
             if (this.connectionState != AppWarp.ConnectionState.Connected) {
                 var _event = new AppWarp.MatchedRoomEvent(AppWarp.ResultCode.BadRequest);
                 if (this.responseCallbacks[AppWarp.Events.onGetMatchedRoomsDone])
