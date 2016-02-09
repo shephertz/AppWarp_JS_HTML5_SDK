@@ -151,8 +151,8 @@ var AppWarp;
         RequestType[RequestType["BroadcastChat"] = 72] = "BroadcastChat";
         RequestType[RequestType["GetRoomInRangeWithProp"] = 73] = "GetRoomInRangeWithProp";
         RequestType[RequestType["GetUserStatus"] = 74] = "GetUserStatus";
-        RequestType[RequestType["JoinAndSubcribeRoom"] = 75] = "JoinAndSubcribeRoom";
-        RequestType[RequestType["LeaveAndUnsucribeRoom"] = 76] = "LeaveAndUnsucribeRoom";
+        RequestType[RequestType["JoinAndSubscribeRoom"] = 75] = "JoinAndSubscribeRoom";
+        RequestType[RequestType["LeaveAndUnsubscribeRoom"] = 76] = "LeaveAndUnsubscribeRoom";
     })(AppWarp.RequestType || (AppWarp.RequestType = {}));
     var RequestType = AppWarp.RequestType;
 
@@ -1164,13 +1164,13 @@ var AppWarp;
                 if (this.responseCallbacks[AppWarp.Events.onUnsubscribeRoomDone])
                     this.responseCallbacks[AppWarp.Events.onUnsubscribeRoomDone](_room);
             }
-            else if (res.getRequestType() == AppWarp.RequestType.JoinAndSubcribeRoom) {
+            else if (res.getRequestType() == AppWarp.RequestType.JoinAndSubscribeRoom) {
                 var _room = new AppWarp.Room(res.getResultCode(), res.getPayloadString());
 
                 if (this.responseCallbacks[AppWarp.Events.onJoinAndSubscribeRoomDone])
                     this.responseCallbacks[AppWarp.Events.onJoinAndSubscribeRoomDone](_room);
             } 
-            else if (res.getRequestType() == AppWarp.RequestType.LeaveAndUnsucribeRoom) {
+            else if (res.getRequestType() == AppWarp.RequestType.LeaveAndUnsubscribeRoom) {
                 var _room = new AppWarp.Room(res.getResultCode(), res.getPayloadString());
                 if (this.responseCallbacks[AppWarp.Events.onLeaveAndUnsubscribeRoomDone])
                     this.responseCallbacks[AppWarp.Events.onLeaveAndUnsubscribeRoomDone](_room);
@@ -1589,7 +1589,7 @@ var AppWarp;
             var data = AppWarp.RequestBuilder.buildWarpRequest(this.SessionID, AppWarp.RequestType.UnsubscribeLobby, payload, true);
             this.sendMessage(data.buffer);
         };
-        WarpClient.prototype.joinAndSubcribeRoom = function (roomId) {
+        WarpClient.prototype.joinAndSubscribeRoom = function (roomId) {
             if (this.connectionState != AppWarp.ConnectionState.Connected) {
                 var _room = new AppWarp.Room(AppWarp.ResultCode.BadRequest);
                 if (this.responseCallbacks[AppWarp.Events.onJoinAndSubscribeRoomDone])
@@ -1599,11 +1599,11 @@ var AppWarp;
             }
 
             var payload = AppWarp.RequestBuilder.buildRoomRequest(roomId);
-            var data = AppWarp.RequestBuilder.buildWarpRequest(this.SessionID, AppWarp.RequestType.JoinAndSubcribeRoom, payload, true);
+            var data = AppWarp.RequestBuilder.buildWarpRequest(this.SessionID, AppWarp.RequestType.JoinAndSubscribeRoom, payload, true);
             this.sendMessage(data.buffer);
         };
 		
-        WarpClient.prototype.leaveAndUnsucribeRoom = function (roomId) {
+        WarpClient.prototype.leaveAndUnsubscribeRoom = function (roomId) {
             if (this.connectionState != AppWarp.ConnectionState.Connected) {
                 var _room = new AppWarp.Room(AppWarp.ResultCode.BadRequest);
                 if (this.responseCallbacks[AppWarp.Events.onLeaveAndUnsubscribeRoomDone])
@@ -1613,7 +1613,7 @@ var AppWarp;
             }
 
             var payload = AppWarp.RequestBuilder.buildRoomRequest(roomId);
-            var data = AppWarp.RequestBuilder.buildWarpRequest(this.SessionID, AppWarp.RequestType.LeaveAndUnsucribeRoom, payload, true);
+            var data = AppWarp.RequestBuilder.buildWarpRequest(this.SessionID, AppWarp.RequestType.LeaveAndUnsubscribeRoom, payload, true);
             this.sendMessage(data.buffer);
         };
         WarpClient.prototype.leaveLobby = function () {
