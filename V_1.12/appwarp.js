@@ -146,11 +146,11 @@ var AppWarp;
         RequestType[RequestType["StopGame"] = 67] = "StopGame";
         RequestType[RequestType["GetMoveHistory"] = 68] = "GetMoveHistory";
         RequestType[RequestType["SetNextTurn"] = 69] = "SetNextTurn";
-        RequestType[RequestType["GetRoomsCount"] = 70] = "GetRoomsCount";
-        RequestType[RequestType["GetUsersCount"] = 71] = "GetUsersCount";
+        RequestType[RequestType["GetAllRoomsCount"] = 70] = "GetAllRoomsCount";
+        RequestType[RequestType["GetOnlineUsersCount"] = 71] = "GetOnlineUsersCount";
         RequestType[RequestType["BroadcastChat"] = 72] = "BroadcastChat";
         RequestType[RequestType["GetRoomInRangeWithProp"] = 73] = "GetRoomInRangeWithProp";
-        RequestType[RequestType["GetOnlineUserStatus"] = 74] = "GetOnlineUserStatus";
+        RequestType[RequestType["GetUserStatus"] = 74] = "GetUserStatus";
         RequestType[RequestType["JoinAndSubcribeRoom"] = 75] = "JoinAndSubcribeRoom";
         RequestType[RequestType["LeaveAndUnsucribeRoom"] = 76] = "LeaveAndUnsucribeRoom";
     })(AppWarp.RequestType || (AppWarp.RequestType = {}));
@@ -258,8 +258,8 @@ var AppWarp;
         Events[Events["onGetLiveUserInfoDone"] = 20] = "onGetLiveUserInfoDone";
         Events[Events["onSetCustomUserDataDone"] = 21] = "onSetCustomUserDataDone";
         Events[Events["onGetMatchedRoomsDone"] = 22] = "onGetMatchedRoomsDone";
-        Events[Events["onGetRoomsCountDone"] = 23] = "onGetRoomsCountDone";
-        Events[Events["onGetUsersCountDone"] = 24] = "onGetUsersCountDone";
+        Events[Events["onGetAllRoomsCountDone"] = 23] = "onGetAllRoomsCountDone";
+        Events[Events["onGetOnlineUsersCountDone"] = 24] = "onGetOnlineUsersCountDone";
 
         Events[Events["onRoomCreated"] = 25] = "onRoomCreated";
         Events[Events["onRoomDestroyed"] = 26] = "onRoomDestroyed";
@@ -291,7 +291,7 @@ var AppWarp;
         Events[Events["onNextTurnRequested"] = 50] = "onNextTurnRequested";
         Events[Events["onUserStatusDone"] = 51] = "onUserStatusDone";
         Events[Events["onJoinAndSubscribeRoomDone"] = 52] = "onJoinAndSubscribeRoomDone";
-        Events[Events["onleaveAndUnsubscribeRoomDone"] = 53] = "onleaveAndUnsubscribeRoomDone";
+        Events[Events["onLeaveAndUnsubscribeRoomDone"] = 53] = "onLeaveAndUnsubscribeRoomDone";
       
     })(AppWarp.Events || (AppWarp.Events = {}));
     var Events = AppWarp.Events;
@@ -1172,8 +1172,8 @@ var AppWarp;
             } 
             else if (res.getRequestType() == AppWarp.RequestType.LeaveAndUnsucribeRoom) {
                 var _room = new AppWarp.Room(res.getResultCode(), res.getPayloadString());
-                if (this.responseCallbacks[AppWarp.Events.onleaveAndUnsubscribeRoomDone])
-                    this.responseCallbacks[AppWarp.Events.onleaveAndUnsubscribeRoomDone](_room);
+                if (this.responseCallbacks[AppWarp.Events.onLeaveAndUnsubscribeRoomDone])
+                    this.responseCallbacks[AppWarp.Events.onLeaveAndUnsubscribeRoomDone](_room);
             } 
             else if (res.getRequestType() == AppWarp.RequestType.LeaveRoom) {
                 var _room = new AppWarp.Room(res.getResultCode(), res.getPayloadString());
@@ -1206,7 +1206,7 @@ var AppWarp;
                 if (this.responseCallbacks[AppWarp.Events.onGetLiveUserInfoDone])
                     this.responseCallbacks[AppWarp.Events.onGetLiveUserInfoDone](_user);
             }
-            else if (res.getRequestType() == AppWarp.RequestType.GetOnlineUserStatus) {
+            else if (res.getRequestType() == AppWarp.RequestType.GetUserStatus) {
                 var _user = new AppWarp.LiveUser(res.getResultCode(), res.getPayloadString());
                 if (this.responseCallbacks[AppWarp.Events.onUserStatusDone])
                     this.responseCallbacks[AppWarp.Events.onUserStatusDone](_user);
@@ -1278,15 +1278,15 @@ var AppWarp;
                     this.responseCallbacks[AppWarp.Events.onSendPrivateUpdateDone](res.getResultCode());
             } else if (res.getRequestType() == AppWarp.RequestType.KeepAlive) {
                 this.countPendingKeepAlives = 0;
-            } else if (res.getRequestType() == AppWarp.RequestType.GetRoomsCount) {
-                if (this.responseCallbacks[AppWarp.Events.onGetRoomsCountDone]) {
+            } else if (res.getRequestType() == AppWarp.RequestType.GetAllRoomsCount) {
+                if (this.responseCallbacks[AppWarp.Events.onGetAllRoomsCountDone]) {
                     var json = JSON.parse(res.getPayloadString());
-                    this.responseCallbacks[AppWarp.Events.onGetRoomsCountDone](res.getResultCode(), json.count);
+                    this.responseCallbacks[AppWarp.Events.onGetAllRoomsCountDone](res.getResultCode(), json.count);
                 }
-            } else if (res.getRequestType() == AppWarp.RequestType.GetUsersCount) {
-                if (this.responseCallbacks[AppWarp.Events.onGetUsersCountDone]) {
+            } else if (res.getRequestType() == AppWarp.RequestType.GetOnlineUsersCount) {
+                if (this.responseCallbacks[AppWarp.Events.onGetOnlineUsersCountDone]) {
                     var json = JSON.parse(res.getPayloadString());
-                    this.responseCallbacks[AppWarp.Events.onGetUsersCountDone](res.getResultCode(), json.count);
+                    this.responseCallbacks[AppWarp.Events.onGetOnlineUsersCountDone](res.getResultCode(), json.count);
                 }
             } else if (res.getRequestType() == AppWarp.RequestType.BroadcastChat) {
                 if (this.responseCallbacks[AppWarp.Events.onSendChatDone])
@@ -1606,8 +1606,8 @@ var AppWarp;
         WarpClient.prototype.LeaveAndUnsucribeRoom = function (roomId) {
             if (this.connectionState != AppWarp.ConnectionState.Connected) {
                 var _room = new AppWarp.Room(AppWarp.ResultCode.BadRequest);
-                if (this.responseCallbacks[AppWarp.Events.onleaveAndUnsubscribeRoomDone])
-                    this.responseCallbacks[AppWarp.Events.onleaveAndUnsubscribeRoomDone](_room);
+                if (this.responseCallbacks[AppWarp.Events.onLeaveAndUnsubscribeRoomDone])
+                    this.responseCallbacks[AppWarp.Events.onLeaveAndUnsubscribeRoomDone](_room);
 
                 return;
             }
@@ -1813,7 +1813,7 @@ var AppWarp;
             }
 			
             var payload = AppWarp.RequestBuilder.buildUserRequest(username);
-            var data = AppWarp.RequestBuilder.buildWarpRequest(this.SessionID, AppWarp.RequestType.GetOnlineUserStatus, payload, true);
+            var data = AppWarp.RequestBuilder.buildWarpRequest(this.SessionID, AppWarp.RequestType.GetUserStatus, payload, true);
             this.sendMessage(data.buffer);
         };
 
@@ -2193,27 +2193,27 @@ var AppWarp;
                 return "http://" + this.LOOKUP_ADDRESS;
         };
 
-        WarpClient.prototype.getUsersCount = function () {
+        WarpClient.prototype.getOnlineUsersCount = function () {
             if (this.connectionState != AppWarp.ConnectionState.Connected) {
-                if (this.responseCallbacks[AppWarp.Events.onGetUsersCountDone])
-                    this.responseCallbacks[AppWarp.Events.onGetUsersCountDone](AppWarp.ResultCode.BadRequest);
+                if (this.responseCallbacks[AppWarp.Events.onGetOnlineUsersCountDone])
+                    this.responseCallbacks[AppWarp.Events.onGetOnlineUsersCountDone](AppWarp.ResultCode.BadRequest);
 
                 return;
             }
 
-            var data = AppWarp.RequestBuilder.buildWarpRequest(this.SessionID, AppWarp.RequestType.GetUsersCount, "", true);
+            var data = AppWarp.RequestBuilder.buildWarpRequest(this.SessionID, AppWarp.RequestType.GetOnlineUsersCount, "", true);
             this.sendMessage(data.buffer);
         };
 
-        WarpClient.prototype.getRoomsCount = function () {
+        WarpClient.prototype.getAllRoomsCount = function () {
             if (this.connectionState != AppWarp.ConnectionState.Connected) {
-                if (this.responseCallbacks[AppWarp.Events.onGetRoomsCountDone])
-                    this.responseCallbacks[AppWarp.Events.onGetRoomsCountDone](AppWarp.ResultCode.BadRequest);
+                if (this.responseCallbacks[AppWarp.Events.onGetAllRoomsCountDone])
+                    this.responseCallbacks[AppWarp.Events.onGetAllRoomsCountDone](AppWarp.ResultCode.BadRequest);
 
                 return;
             }
 
-            var data = AppWarp.RequestBuilder.buildWarpRequest(this.SessionID, AppWarp.RequestType.GetRoomsCount, "", true);
+            var data = AppWarp.RequestBuilder.buildWarpRequest(this.SessionID, AppWarp.RequestType.GetAllRoomsCount, "", true);
             this.sendMessage(data.buffer);
         };
 
