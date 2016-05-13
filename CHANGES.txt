@@ -1,5 +1,14 @@
 Version 1.12
 ============
+*added one more parameter in create room and create turn room for save history
+ eg:_warpclient.createRoom("xcx","cvzv",5,null,true) -> true indicates either you want to save history or not
+* getChatHistory API added
+* setDbName API added
+* added overloaded method for send chat with two more parameter
+ eg : _warpclient.sendChat("Hello",true,roomID);
+
+Version 1.12
+============
 
 * JoinAndSubcribeRoom added
 * LeaveAndUnsucribeRoom added
